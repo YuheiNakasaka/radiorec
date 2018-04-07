@@ -135,6 +135,12 @@
   version = "v1.0.2"
 
 [[projects]]
+  name = "github.com/urfave/cli"
+  packages = ["."]
+  revision = "cfb38830724cc34fedffe9a2a29fb54fa9169cd1"
+  version = "v1.20.0"
+
+[[projects]]
   branch = "master"
   name = "github.com/valyala/bytebufferpool"
   packages = ["."]
@@ -183,6 +189,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "a5f228e670139727b215b17d43ac48914deb83eb32abb0cf192b40fd3a8da5b6"
+  inputs-digest = "74e16b693cd750f00d77fb67ad4e8732e4905597161daa2bb0df388bc8041f0e"
   solver-name = "gps-cdcl"
   solver-version = 1

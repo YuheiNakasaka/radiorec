@@ -38,9 +38,7 @@ func Programs(c echo.Context) error {
 		Joins("inner join program_contents on programs.id = program_contents.program_id").
 		Order("program_contents.id desc").Offset(offset).Limit(limit).Scan(&results)
 
-	c.Response().Header().Set("Content-Type", "application/json; charset=UTF-8")
 	c.Response().Header().Set("Access-Control-Allow-Origin", "*")
 	c.Response().Header().Set("Access-Control-Allow-Methods", "GET,HEAD")
-	c.Response().WriteHeader(http.StatusOK)
 	return c.JSON(http.StatusOK, results)
 }
