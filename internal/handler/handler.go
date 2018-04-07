@@ -3,6 +3,7 @@ package handler
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/YuheiNakasaka/radiorec/internal/db"
 	"github.com/labstack/echo"
@@ -21,9 +22,15 @@ func Programs(c echo.Context) error {
 		return fmt.Errorf("Failed to connect database: %v", err)
 	}
 
-	// Fetch programs
-	offset := 0
-	limit := 10
+	// offset and limit params are required
+	var offset, limit int
+	if offset, err = strconv.Atoi(c.QueryParam("offset")); err != nil {
+		return fmt.Errorf("Failed to convert offset to int: %v", err)
+	}
+	if limit, err = strconv.Atoi(c.QueryParam("limit")); err != nil {
+		return fmt.Errorf("Failed to convert limit to int: %v", err)
+	}
+
 	conn := mydb.Connection
 	results := []db.ProgramJoinsProgramContent{}
 	conn.Table("programs").
@@ -31,5 +38,9 @@ func Programs(c echo.Context) error {
 		Joins("inner join program_contents on programs.id = program_contents.program_id").
 		Order("program_contents.id desc").Offset(offset).Limit(limit).Scan(&results)
 
-	return c.String(http.StatusOK, "Programs")
+	c.Response().Header().Set("Content-Type", "application/json; charset=UTF-8")
+	c.Response().Header().Set("Access-Control-Allow-Origin", "*")
+	c.Response().Header().Set("Access-Control-Allow-Methods", "GET,HEAD")
+	c.Response().WriteHeader(http.StatusOK)
+	return c.JSON(http.StatusOK, results)
 }
