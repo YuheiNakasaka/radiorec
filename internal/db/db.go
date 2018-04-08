@@ -66,3 +66,23 @@ func (mydb *MyDB) New() error {
 
 	return err
 }
+
+// ValidProgramID : check existense of Program ID
+func (mydb *MyDB) ValidProgramID(id int) bool {
+	var program Program
+	mydb.Connection.Find(&program, "id=?", id)
+	if len(program.StartTime) == 0 {
+		return false
+	}
+	return true
+}
+
+// InsertProgramContent : register program content to table
+func (mydb *MyDB) InsertProgramContent(programID int, videoPath string) {
+	programContent := ProgramContent{
+		ProgramID: programID,
+		VideoPath: videoPath,
+	}
+
+	mydb.Connection.Create(&programContent)
+}

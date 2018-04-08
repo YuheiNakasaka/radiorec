@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/YuheiNakasaka/radiorec/internal/recorder/ag"
 	"github.com/urfave/cli"
 )
 
@@ -18,8 +19,18 @@ func main() {
 			Name:    "record",
 			Aliases: []string{"r"},
 			Usage:   "Record radio",
+			Flags: []cli.Flag{
+				cli.IntFlag{
+					Name:  "id, i",
+					Usage: "set program ID",
+				},
+				cli.IntFlag{
+					Name:  "time, t",
+					Usage: "set airtime",
+				},
+			},
 			Action: func(c *cli.Context) error {
-				return nil
+				return ag.Start(c.Int("id"), c.Int("time"))
 			},
 		},
 	}

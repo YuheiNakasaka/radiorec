@@ -90,6 +90,12 @@
   version = "v0.0.3"
 
 [[projects]]
+  name = "github.com/mattn/go-shellwords"
+  packages = ["."]
+  revision = "02e3cf038dcea8290e44424da473dd12be796a8a"
+  version = "v1.0.3"
+
+[[projects]]
   branch = "master"
   name = "github.com/mitchellh/mapstructure"
   packages = ["."]
@@ -100,6 +106,12 @@
   packages = ["."]
   revision = "acdc4509485b587f5e675510c4f2c63e90ff68a8"
   version = "v1.1.0"
+
+[[projects]]
+  name = "github.com/satori/go.uuid"
+  packages = ["."]
+  revision = "f58768cc1a7a7e77a3bd49e98cdd21419399b6a3"
+  version = "v1.2.0"
 
 [[projects]]
   name = "github.com/spf13/afero"
@@ -189,6 +201,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "74e16b693cd750f00d77fb67ad4e8732e4905597161daa2bb0df388bc8041f0e"
+  inputs-digest = "6cea9612726a43a151f6c5859d8ded9b589231fe737403e760943a7a35cda293"
   solver-name = "gps-cdcl"
   solver-version = 1
