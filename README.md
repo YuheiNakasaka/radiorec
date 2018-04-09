@@ -52,8 +52,9 @@ $ curl -XGET "http://localhost:1323/programs?offset=0&limit=1" | jq
 ```
 
 # TODO
-- recorderの各種スクリプト
-- アップロードするスクリプト
-- cron設定するプロセス
-- 各種ミドルウェアが入った開発用docker-compose
-- デプロイ
+- [x] recorderの各種スクリプト
+- [ ] アップロードするスクリプト
+- [ ] cron設定するプロセス
+- [ ] typeのカラムを追加するか考慮する
+- [ ] 各種ミドルウェアが入った開発用docker-compose
+- [ ] デプロイ
