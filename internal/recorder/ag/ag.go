@@ -1,93 +1,37 @@
 package ag
 
 import (
-	"fmt"
-	"os"
-	"os/exec"
 	"strconv"
-	"sync"
 
-	"github.com/YuheiNakasaka/radiorec/internal/db"
-	"github.com/YuheiNakasaka/radiorec/internal/filemanager"
-	"github.com/mattn/go-shellwords"
+	"github.com/YuheiNakasaka/radiorec/internal/recorder"
 )
 
+// Ag is a&g+ struct
+type Ag struct {
+	programID int
+	airtime   int
+}
+
+// ProgramID is method to fill recorder.Recorder interface.
+func (a *Ag) ProgramID() int {
+	return a.programID
+}
+
+// Airtime is method to fill recorder.Recorder interface.
+func (a *Ag) Airtime() int {
+	return a.airtime
+}
+
+// RecordCommand is method to fill recorder.Recorder interface.
+// It returns rtmpdump command to record during airtime.
+func (a *Ag) RecordCommand(outputPath string) string {
+	return "rtmpdump -q -r rtmp://fms-base2.mitene.ad.jp/agqr/aandg2 --live --stop " + strconv.Itoa(a.airtime) + " -o " + outputPath + ".flv"
+}
+
 // Start : record ag program
-func Start(programID int, airtime int) error {
-	// check args
-	if programID == 0 {
-		return fmt.Errorf("Could not set 0 as programID")
-	}
-	if airtime == 0 {
-		return fmt.Errorf("Could not set 0 as airtime")
-	}
-
-	// get db connection
-	mydb := &db.MyDB{}
-	err := mydb.New()
-	if err != nil {
-		return fmt.Errorf("Failed to connect database: %v", err)
-	}
-
-	if mydb.ValidProgramID(programID) == false {
-		return fmt.Errorf("Failed to find the program id: %v", programID)
-	}
-
-	// create output path and filenames
-	fileManager := &filemanager.FileManager{}
-	err = fileManager.PreparePaths(programID)
-	if err != nil {
-		return fmt.Errorf("Failed to make directory: %v", err)
-	}
-	fmt.Println(fileManager.FilePath, fileManager.OutputPath)
-
-	// record as live streaming
-	recExt := ".flv"
-	recCmd := "rtmpdump -q -r rtmp://fms-base2.mitene.ad.jp/agqr/aandg2 --live --stop " + strconv.Itoa(airtime) + " -o " + fileManager.OutputPath + recExt
-	fmt.Println(recCmd)
-
-	// convert flv to mp4
-	mp4Ext := ".mp4"
-	mp4Cmd := "ffmpeg -y -i " + fileManager.OutputPath + ".flv -acodec aac -vcodec h264 " + fileManager.OutputPath + mp4Ext
-	fmt.Println(mp4Cmd)
-
-	// wait for finishing to record
-	var wg sync.WaitGroup
-	wg.Add(1)
-	go func() {
-		// start recording
-		fmt.Println("Recording...")
-		recC, parseErr := shellwords.Parse(recCmd)
-		if parseErr != nil {
-			return
-		}
-		out, cmdErr := exec.Command(recC[0], recC[1:]...).Output()
-		fmt.Println(out, cmdErr)
-
-		// start converting
-		fmt.Println("Converting...")
-		convC, convErr := shellwords.Parse(mp4Cmd)
-		if convErr != nil {
-			return
-		}
-		convO, convE := exec.Command(convC[0], convC[1:]...).Output()
-		fmt.Println(convO, convE)
-
-		// remove src flv file
-		if rmErr := os.Remove(fileManager.OutputPath + ".flv"); rmErr != nil {
-			return
-		}
-
-		// register data to table
-		fmt.Println("Registering...")
-		mydb.InsertProgramContent(programID, fileManager.FilePath+".mp4")
-
-		// S3にアップロード
-		// uploader.Upload(outputPath+".mp4", filePath+".mp4")
-
-		wg.Done()
-	}()
-	wg.Wait()
-
-	return err
+func (a *Ag) Start(programID int, airtime int) error {
+	ag := &Ag{}
+	ag.programID = programID
+	ag.airtime = airtime
+	return recorder.Record(ag)
 }

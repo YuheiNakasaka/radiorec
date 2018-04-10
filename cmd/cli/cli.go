@@ -38,9 +38,11 @@ func main() {
 			Action: func(c *cli.Context) error {
 				switch c.String("station") {
 				case "ag":
-					return ag.Start(c.Int("id"), c.Int("time"))
+					recorder := ag.Ag{}
+					return recorder.Start(c.Int("id"), c.Int("time"))
 				case "radiko":
-					return radiko.Start(c.Int("id"), c.Int("time"))
+					recorder := radiko.Radiko{}
+					return recorder.Start(c.Int("id"), c.Int("time"))
 				default:
 					return fmt.Errorf("radio station not found(e.g -s ag)")
 				}

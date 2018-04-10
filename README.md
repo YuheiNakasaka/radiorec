@@ -53,6 +53,12 @@ $ curl -XGET "http://localhost:1323/programs?offset=0&limit=1" | jq
 
 # TODO
 - [x] recorderの各種スクリプト
+- [x] recorderの設計の見直し
+  - internal/recorder/配下の各放送局は`RecorderBase interface`を実装する
+  - `RecorderBase`では`exec.Command`で実行できる録音コマンドだけ返すメソッドを定義
+  - `RecorderBase`を引数に取る`recorder.Generate(rb RecorderBase)`みたいな共通関数を作る
+  - 各放送局のスクリプトでは`RecorderBase`のコマンド実装とそれを`recorder.Generate(rb RecorderBase)`に渡すだけみたいな実装だけに絞る
+  - これによって放送局が増えた時は`RecorderBase`のコマンド実装だけすれば基本的にはやることは終わりになるのでメンテしやすくなりそう
 - [ ] アップロードするスクリプト
 - [ ] cron設定するプロセス
 - [ ] typeのカラムを追加するか考慮する
