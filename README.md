@@ -59,8 +59,9 @@ $ curl -XGET "http://localhost:1323/programs?offset=0&limit=1" | jq
   - `RecorderBase`を引数に取る`recorder.Generate(rb RecorderBase)`みたいな共通関数を作る
   - 各放送局のスクリプトでは`RecorderBase`のコマンド実装とそれを`recorder.Generate(rb RecorderBase)`に渡すだけみたいな実装だけに絞る
   - これによって放送局が増えた時は`RecorderBase`のコマンド実装だけすれば基本的にはやることは終わりになるのでメンテしやすくなりそう
-- [ ] アップロードするスクリプト
+- [x] アップロードするスクリプト
 - [ ] cron設定するプロセス
-- [ ] typeのカラムを追加するか考慮する
+- [x] typeのカラムを追加するか考慮する
+  - on airしてるかどうかのフラグとラジオ局を表すカラムを追加した
 - [ ] 各種ミドルウェアが入った開発用docker-compose
 - [ ] デプロイ

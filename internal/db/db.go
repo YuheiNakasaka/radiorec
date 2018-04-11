@@ -16,12 +16,14 @@ type MyDB struct {
 
 // Program : model
 type Program struct {
-	ID        int    `gorm:"primary_key"`
-	Name      string `gorm:"size:512"`
-	Cast      string `gorm:"size:255"`
-	DayOfWeek int
-	StartTime []uint8 `gorm:"type:time"`
-	Airtime   int
+	ID          int    `gorm:"primary_key"`
+	Name        string `gorm:"size:512"`
+	Cast        string `gorm:"size:255"`
+	DayOfWeek   int
+	StartTime   []uint8 `gorm:"type:time"`
+	Airtime     int
+	Station     int
+	OnAirStatus int
 }
 
 // ProgramContent : model
@@ -65,6 +67,13 @@ func (mydb *MyDB) New() error {
 	mydb.Connection = db
 
 	return err
+}
+
+// FindProgram : get program matched to id
+func (mydb *MyDB) FindProgram(id int) Program {
+	var program Program
+	mydb.Connection.Find(&program, "id=?", id)
+	return program
 }
 
 // ValidProgramID : check existense of Program ID

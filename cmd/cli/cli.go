@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/YuheiNakasaka/radiorec/internal/db"
 	"github.com/YuheiNakasaka/radiorec/internal/recorder/ag"
 	"github.com/YuheiNakasaka/radiorec/internal/recorder/radiko"
 	"github.com/urfave/cli"
@@ -22,34 +23,33 @@ func main() {
 			Aliases: []string{"r"},
 			Usage:   "Record radio",
 			Flags: []cli.Flag{
-				cli.StringFlag{
-					Name:  "station, s",
-					Usage: "set radio station type(ag, radiko)",
-				},
 				cli.IntFlag{
 					Name:  "id, i",
 					Usage: "set program ID",
 				},
-				cli.IntFlag{
-					Name:  "time, t",
-					Usage: "set airtime",
-				},
 				cli.StringFlag{
-					Name:  "storage",
+					Name:  "storage, s",
 					Value: "",
-					Usage: "use external storage or not(default is local)",
+					Usage: "set external storage flag. Default is local. (e.g -s s3)",
 				},
 			},
 			Action: func(c *cli.Context) error {
-				switch c.String("station") {
-				case "ag":
+				mydb := &db.MyDB{}
+				err := mydb.New()
+				if err != nil {
+					return fmt.Errorf("Failed to connect database: %v", err)
+				}
+				program := mydb.FindProgram(c.Int("id"))
+
+				switch program.Station {
+				case 1: // a&g
 					recorder := ag.Ag{}
-					return recorder.Start(c.Int("id"), c.Int("time"), c.String("storage"))
-				case "radiko":
+					return recorder.Start(program.ID, program.Airtime, c.String("storage"))
+				case 2: // radiko
 					recorder := radiko.Radiko{}
-					return recorder.Start(c.Int("id"), c.Int("time"), c.String("storage"))
+					return recorder.Start(program.ID, program.Airtime, c.String("storage"))
 				default:
-					return fmt.Errorf("radio station not found(e.g -s ag)")
+					return fmt.Errorf("the program not found: %v", c.Int("id"))
 				}
 			},
 		},
