@@ -27,6 +27,7 @@ var (
 type Radiko struct {
 	programID int
 	airtime   int
+	storage   string
 }
 
 // ProgramID is method to fill recorder.Recorder interface.
@@ -39,6 +40,11 @@ func (r *Radiko) Airtime() int {
 	return r.airtime
 }
 
+// Storage is method to fill recorder.Recorder interface.
+func (r *Radiko) Storage() string {
+	return r.storage
+}
+
 // RecordCommand is method to fill recorder.Recorder interface.
 // It returns rtmpdump command to record during airtime.
 func (r *Radiko) RecordCommand(outputPath string) string {
@@ -47,10 +53,11 @@ func (r *Radiko) RecordCommand(outputPath string) string {
 }
 
 // Start : record ag program
-func (r *Radiko) Start(programID int, airtime int) error {
+func (r *Radiko) Start(programID int, airtime int, storage string) error {
 	radiko := &Radiko{}
 	radiko.programID = programID
 	radiko.airtime = airtime
+	radiko.storage = storage
 	return recorder.Record(radiko)
 }
 

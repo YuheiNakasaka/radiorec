@@ -10,6 +10,7 @@ import (
 type Ag struct {
 	programID int
 	airtime   int
+	storage   string
 }
 
 // ProgramID is method to fill recorder.Recorder interface.
@@ -22,6 +23,11 @@ func (a *Ag) Airtime() int {
 	return a.airtime
 }
 
+// Storage is method to fill recorder.Recorder interface.
+func (a *Ag) Storage() string {
+	return a.storage
+}
+
 // RecordCommand is method to fill recorder.Recorder interface.
 // It returns rtmpdump command to record during airtime.
 func (a *Ag) RecordCommand(outputPath string) string {
@@ -29,9 +35,10 @@ func (a *Ag) RecordCommand(outputPath string) string {
 }
 
 // Start : record ag program
-func (a *Ag) Start(programID int, airtime int) error {
+func (a *Ag) Start(programID int, airtime int, storage string) error {
 	ag := &Ag{}
 	ag.programID = programID
 	ag.airtime = airtime
+	ag.storage = storage
 	return recorder.Record(ag)
 }

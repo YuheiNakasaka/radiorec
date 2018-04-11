@@ -34,15 +34,20 @@ func main() {
 					Name:  "time, t",
 					Usage: "set airtime",
 				},
+				cli.StringFlag{
+					Name:  "storage",
+					Value: "",
+					Usage: "use external storage or not(default is local)",
+				},
 			},
 			Action: func(c *cli.Context) error {
 				switch c.String("station") {
 				case "ag":
 					recorder := ag.Ag{}
-					return recorder.Start(c.Int("id"), c.Int("time"))
+					return recorder.Start(c.Int("id"), c.Int("time"), c.String("storage"))
 				case "radiko":
 					recorder := radiko.Radiko{}
-					return recorder.Start(c.Int("id"), c.Int("time"))
+					return recorder.Start(c.Int("id"), c.Int("time"), c.String("storage"))
 				default:
 					return fmt.Errorf("radio station not found(e.g -s ag)")
 				}

@@ -8,6 +8,7 @@ import (
 
 	"github.com/YuheiNakasaka/radiorec/internal/db"
 	"github.com/YuheiNakasaka/radiorec/internal/filemanager"
+	"github.com/YuheiNakasaka/radiorec/internal/uploader/s3"
 	"github.com/mattn/go-shellwords"
 )
 
@@ -15,6 +16,7 @@ import (
 type Recorder interface {
 	ProgramID() int
 	Airtime() int
+	Storage() string
 	RecordCommand(string) string
 }
 
@@ -89,8 +91,11 @@ func Record(r Recorder) error {
 		fmt.Println("Registering...")
 		mydb.InsertProgramContent(programID, fileManager.FilePath+".mp4")
 
-		// S3にアップロード
-		// uploader.Upload(outputPath+".mp4", filePath+".mp4")
+		// upload file to external storage
+		if r.Storage() == "s3" {
+			awsS3 := s3.AwsS3{}
+			err = awsS3.Upload(fileManager.OutputPath+".mp4", fileManager.FilePath+".mp4")
+		}
 
 		wg.Done()
 	}()
