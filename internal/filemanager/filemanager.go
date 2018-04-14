@@ -19,17 +19,19 @@ type FileManager struct {
 
 // StaticFilePath : return directory path to place static files (e.g mp4, flv, swf..)
 func StaticFilePath() (string, error) {
-	b, err := exec.Command("go", "env", "GOPATH").CombinedOutput()
-	if err != nil {
-		return "", fmt.Errorf("Failed to find GOPATH: %v", err)
-	}
-	outputParentDir := ""
-	for _, p := range filepath.SplitList(strings.TrimSpace(string(b))) {
-		p = filepath.Join(p, filepath.FromSlash("/src/github.com/YuheiNakasaka/radiorec/public"))
-		outputParentDir = p
+	outputParentDir := os.Getenv("OUTPUT_DIR")
+	if outputParentDir == "" {
+		b, err := exec.Command("go", "env", "GOPATH").CombinedOutput()
+		if err != nil {
+			return "", fmt.Errorf("Failed to find GOPATH: %v", err)
+		}
+		for _, p := range filepath.SplitList(strings.TrimSpace(string(b))) {
+			p = filepath.Join(p, filepath.FromSlash("/src/github.com/YuheiNakasaka/radiorec/public"))
+			outputParentDir = p
+		}
 	}
 	if outputParentDir == "" {
-		return "", fmt.Errorf("Failed to create directory path: %v", err)
+		return "", fmt.Errorf("Failed to create directory path")
 	}
 	return outputParentDir, nil
 }

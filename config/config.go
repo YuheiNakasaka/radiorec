@@ -18,7 +18,7 @@ type Config struct {
 // Init initializes struct.
 // Default path is $GOPATH/src/github.com/YuheiNakasaka/radiorec/config/
 func (c *Config) Init() error {
-	configDir := os.Getenv("CONFIG_PATH")
+	configDir := os.Getenv("CONFIG_DIR")
 	if configDir == "" {
 		b, err := exec.Command("go", "env", "GOPATH").CombinedOutput()
 		if err != nil {

@@ -56,14 +56,14 @@ dep ensure
 
 下記コマンドを実行するとcrontabが書き換わる。
 
-`CONFIG_PATH`には先ほど作った`config/config.yml`の場所を指定する。
+`CONFIG_DIR`には先ほど作った`config/config.yml`の場所を指定する。
 
 ちなみに** 既存のcrontabの内容を上書きするので他に何か大事な設定をしている場合はヤバイ... **
 
 ##### Example
 
 ```
-CONFIG_PATH=/var/www/app/radiodic/config go run cmd/cli/cli.go cron
+CONFIG_DIR=/var/www/app/radiodic/config go run cmd/cli/cli.go cron
 ```
 
 ### 4. 試し
@@ -71,7 +71,7 @@ CONFIG_PATH=/var/www/app/radiodic/config go run cmd/cli/cli.go cron
 試しに下記の録音コマンドを実行してみて、エラーが出なければ大丈夫です。
 
 ```
-$ CONFIG_PATH=/var/www/app/radiodic/config go run cmd/cli record -id 1
+$ CONFIG_DIR=/var/www/app/radiodic/config go run cmd/cli record -id 1
 
 /public/1/09f706c5-b7f3-43ec-9beb-7f1fe44fb0ab /Users/razokulover/src/github.com/YuheiNakasaka/radiorec/public/1/09f706c5-b7f3-43ec-9beb-7f1fe44fb0ab
 rtmpdump -q -r rtmp://fms-base2.mitene.ad.jp/agqr/aandg2 --live --stop 3 -o /Users/razokulover/src/github.com/YuheiNakasaka/radiorec/public/1/09f706c5-b7f3-43ec-9beb-7f1fe44fb0ab.flv
@@ -97,30 +97,40 @@ Registering...
 - storage, s
   - 任意
   - 外部のストレージに録音ファイルを保存する場合。デフォルトはローカルのみ保存。
-- CONFIG_PATH
+- CONFIG_DIR
   - 任意
   - 環境変数
   - 設定ファイル(config.yml)の場所を指定
   - デフォルトは`$GOPATH/src/github.com/YuheiNakasaka/radiorec/config`
+- OUTPUT_DIR
+  - 任意
+  - 環境変数
+  - 録音したファイルの場所を指定
+  - デフォルトは`$GOPATH/src/github.com/YuheiNakasaka/radiorec/public`
 
 ##### Example
 ```
-CONFIG_PATH=/etc/app/config go run cmd/cli/cli.go record -id 123 -storage s3
+CONFIG_DIR=/home/hoge/config OUTPUT_DIR=/var/public go run cmd/cli/cli.go record -id 123 -storage s3
 ```
 
 ### Cron
 Progrmsテーブルに設定されている放送時間に録音コマンドが動くようにcrontabを書き換える
 
 ##### Parameters
-- CONFIG_PATH
+- CONFIG_DIR
   - 任意
   - 環境変数
   - 設定ファイル(config.yml)の場所を指定
   - デフォルトは`$GOPATH/src/github.com/YuheiNakasaka/radiorec/config`
+- OUTPUT_DIR
+  - 任意
+  - 環境変数
+  - 録音したファイルの場所を指定
+  - デフォルトは`$GOPATH/src/github.com/YuheiNakasaka/radiorec/public`
 
 ##### Example
 ```
-CONFIG_PATH=/etc/app/config go run cmd/cli/cli.go cron
+CONFIG_DIR=/home/hoge/config OUTPUT_DIR=/var/public go run cmd/cli/cli.go cron
 ```
 
 # Endpoint
