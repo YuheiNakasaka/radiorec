@@ -1,0 +1,12 @@
+database:
+  host: 127.0.0.1
+  port: 3306
+  name: radiorec
+  user: root
+  password: root
+aws:
+  s3:
+    access_key_id: YOUR_ACCESS_KEY_ID_IS_SETUP_HERE
+    secret_access_key: YOUR_SECRET_ACCESS_KEY_IS_SETUP_HERE
+    region: ap-northeast-1
+    bucket: your-radiorec-bucket-name-is-written-here
