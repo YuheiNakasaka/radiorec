@@ -60,7 +60,8 @@ $ curl -XGET "http://localhost:1323/programs?offset=0&limit=1" | jq
   - 各放送局のスクリプトでは`RecorderBase`のコマンド実装とそれを`recorder.Generate(rb RecorderBase)`に渡すだけみたいな実装だけに絞る
   - これによって放送局が増えた時は`RecorderBase`のコマンド実装だけすれば基本的にはやることは終わりになるのでメンテしやすくなりそう
 - [x] アップロードするスクリプト
-- [ ] cron設定するプロセス
+- [x] cron設定するプロセス
+  - crontabをclearして再生成する雑な作り。既存のcrontabを消すから危険。
 - [x] typeのカラムを追加するか考慮する
   - on airしてるかどうかのフラグとラジオ局を表すカラムを追加した
 - [ ] 各種ミドルウェアが入った開発用docker-compose

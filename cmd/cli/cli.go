@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/YuheiNakasaka/radiorec/internal/cron"
 	"github.com/YuheiNakasaka/radiorec/internal/db"
 	"github.com/YuheiNakasaka/radiorec/internal/recorder/ag"
 	"github.com/YuheiNakasaka/radiorec/internal/recorder/radiko"
@@ -51,6 +52,14 @@ func main() {
 				default:
 					return fmt.Errorf("the program not found: %v", c.Int("id"))
 				}
+			},
+		},
+		{
+			Name:    "cron",
+			Aliases: []string{"c"},
+			Usage:   "Clear old crontab and recreate new crontab.",
+			Action: func(c *cli.Context) error {
+				return cron.Generate()
 			},
 		},
 	}
