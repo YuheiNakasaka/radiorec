@@ -36,6 +36,13 @@
 
 ** ※Requirementsはすべて導入してる前提です **
 
+### 0. ダウンロード
+
+```
+$ git clone https://github.com/YuheiNakasaka/radiorec
+$ cd radiorec
+```
+
 ### 1. 設定ファイルの準備
 
 `config/config.exmpale.yml`を書き換えて、`config/config.yml`として保存する。
