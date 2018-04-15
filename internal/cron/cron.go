@@ -33,14 +33,13 @@ func generateCronLine(programID int, dayOfWeek int, times map[string]string) map
 	configDir := os.Getenv("CONFIG_DIR")
 	outputParentDir := os.Getenv("OUTPUT_DIR")
 
-	chdirCmd := "cd /var/www/radiorec/;"
 	stdoutCmd := ">> /var/log/cron.log  2>&1"
-	mainCmd := "CONFIG_DIR=" + configDir + " OUTPUT_DIR=" + outputParentDir + " /var/www/radiorec record -i " + strconv.Itoa(programID) + " -s s3"
+	mainCmd := "CONFIG_DIR=" + configDir + " OUTPUT_DIR=" + outputParentDir + " radiorec-cli record -i " + strconv.Itoa(programID) + " -s s3"
 	cronTime := times["minute"] + " " + times["hour"] + " * * " + strconv.Itoa(dayOfWeek)
 
 	cmds := map[string]string{}
 	cmds["schedule"] = cronTime
-	cmds["exec"] = chdirCmd + mainCmd + " " + stdoutCmd
+	cmds["exec"] = mainCmd + " " + stdoutCmd
 
 	return cmds
 }

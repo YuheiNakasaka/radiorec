@@ -1,4 +1,5 @@
 config/config.yml
 vendor/
 public/
-build/
+build/*
+!build/.keep

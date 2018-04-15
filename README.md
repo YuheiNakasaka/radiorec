@@ -73,6 +73,15 @@ dep ensure
 CONFIG_DIR=/var/www/app/radiodic/config go run cmd/cli/cli.go cron
 ```
 
+また、commandは`radiorec-cli`としてコマンド実行するので、**本番** で使うところではPATHの通ったところにリンクを貼っておいたほうが良い。
+
+##### Example
+
+```
+GOOS=linux GOARCH=amd64 go build -o build/radiorec-cli cmd/cli/cli.go
+ln -s /app/build/radiorec-cli /usr/local/bin/radiorec-cli
+```
+
 ### 4. 試し
 
 試しに下記の録音コマンドを実行してみて、エラーが出なければ大丈夫です。
@@ -121,7 +130,9 @@ CONFIG_DIR=/home/hoge/config OUTPUT_DIR=/var/public go run cmd/cli/cli.go record
 ```
 
 ### Cron
-Progrmsテーブルに設定されている放送時間に録音コマンドが動くようにcrontabを書き換える
+Progrmsテーブルに設定されている放送時間に録音コマンドが動くようにcrontabを書き換える。
+
+`radiorec-cli`というコマンドを作って、パスを通して置かないといけないのが結構イケてない(自分の環境ではいいけど)。
 
 ##### Parameters
 - CONFIG_DIR
@@ -199,9 +210,13 @@ $ curl -XGET "http://localhost:1323/programs?offset=0&limit=1" | jq
   - crontabをclearして再生成する雑な作り。既存のcrontabを消すから危険。
 - [x] typeのカラムを追加するか考慮する
   - on airしてるかどうかのフラグとラジオ局を表すカラムを追加した
+- [ ] ビルド
+  - Makefileとかで
 - [ ] テスト
 - [ ] 各種ミドルウェアが入った開発用docker-compose
 - [ ] デプロイ
+- [ ] 監視・アラート
+- [ ] cron書き換えのところをライブラリとして切り出す
 
 # License
 
