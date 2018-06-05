@@ -31,7 +31,7 @@ func (a *Ag) Storage() string {
 // RecordCommand is method to fill recorder.Recorder interface.
 // It returns rtmpdump command to record during airtime.
 func (a *Ag) RecordCommand(outputPath string) string {
-	return "rtmpdump -q -r rtmp://fms-base2.mitene.ad.jp/agqr/aandg2 --live --stop " + strconv.Itoa(a.airtime) + " -o " + outputPath + ".flv"
+	return "rtmpdump -q -r rtmp://fms-base2.mitene.ad.jp/agqr/aandg22 --live --stop " + strconv.Itoa(a.airtime) + " -o " + outputPath + ".flv"
 }
 
 // Start : record ag program
