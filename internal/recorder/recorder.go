@@ -97,6 +97,11 @@ func Record(r Recorder) error {
 			err = awsS3.Upload(fileManager.OutputPath+".mp4", fileManager.FilePath+".mp4")
 		}
 
+		// remove src mp4 file
+		if rmErr := os.Remove(fileManager.OutputPath + ".mp4"); rmErr != nil {
+			return
+		}
+
 		wg.Done()
 	}()
 	wg.Wait()
