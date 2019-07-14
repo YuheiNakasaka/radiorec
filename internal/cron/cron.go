@@ -68,6 +68,10 @@ func Generate() error {
 	defer tmpfile.Close()
 	defer os.Remove(tmpFilePath)
 
+	// add util cron
+	tmpfile.WriteString(fmt.Sprintf("#%s\n%s\n", "Backup database per day", "0 12 * * * sh /home/ubuntu/dbbk.sh >> /var/log/cron.log 2>&1"))
+	tmpfile.WriteString(fmt.Sprintf("#%s\n%s\n", "Monitor endpoint", "30 */2 * * * sh /home/ubuntu/monitor_ag_endpoint.sh >> /var/log/cron.log 2>&1"))
+
 	// create cron lines
 	for _, result := range results {
 		time := convertStartTime(string(result.StartTime))

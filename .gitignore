@@ -3,3 +3,5 @@ vendor/
 public/
 build/*
 !build/.keep
+backupdb.sh
+monitor_ag_endpoint.sh

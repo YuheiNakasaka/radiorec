@@ -67,6 +67,15 @@ dep ensure
 
 ちなみに** 既存のcrontabの内容を上書きするので他に何か大事な設定をしている場合はヤバイ... **
 
+### おまけ
+
+監視系のシェルスクリプトを作って本番環境に配置しておくと良さげ。
+
+- backupdb.example.sh
+- monitor_ag_endpoint.example.sh
+
+を適宜編集して使う。
+
 ##### Example
 
 ```
