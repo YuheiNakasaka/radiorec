@@ -1,6 +1,6 @@
 #!/bin/sh
 
-`rtmpdump -q -r rtmp://fms-base2.mitene.ad.jp/agqr/aandg22 --live --stop 1 -o /tmp/dead_or_live.flv`
+`rtmpdump -q -r rtmp://fms-base2.mitene.ad.jp/agqr/aandg1 --live --stop 1 -o /tmp/dead_or_live.flv`
 
 CONTENT=`file /tmp/dead_or_live.flv | grep empty`
 
