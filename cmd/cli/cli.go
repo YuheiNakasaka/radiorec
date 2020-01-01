@@ -8,6 +8,7 @@ import (
 	"github.com/YuheiNakasaka/radiorec/internal/cron"
 	"github.com/YuheiNakasaka/radiorec/internal/db"
 	"github.com/YuheiNakasaka/radiorec/internal/recorder/ag"
+	"github.com/YuheiNakasaka/radiorec/internal/recorder/hellofive"
 	"github.com/YuheiNakasaka/radiorec/internal/recorder/radiko"
 	"github.com/urfave/cli"
 )
@@ -48,6 +49,9 @@ func main() {
 					return recorder.Start(program.ID, program.Airtime, c.String("storage"))
 				case 2: // radiko
 					recorder := radiko.Radiko{}
+					return recorder.Start(program.ID, program.Airtime, c.String("storage"))
+				case 3: // radiko
+					recorder := hellofive.Hellofive{}
 					return recorder.Start(program.ID, program.Airtime, c.String("storage"))
 				default:
 					return fmt.Errorf("the program not found: %v", c.Int("id"))
