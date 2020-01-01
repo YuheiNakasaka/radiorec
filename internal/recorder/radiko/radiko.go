@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/http/cookiejar"
 	"net/url"
 	"os"
 	"os/exec"
@@ -12,6 +13,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/YuheiNakasaka/radiorec/config"
 	"github.com/YuheiNakasaka/radiorec/internal/filemanager"
 	"github.com/mattn/go-shellwords"
 
@@ -28,6 +30,7 @@ type Radiko struct {
 	programID int
 	airtime   int
 	storage   string
+	channel   string
 }
 
 // ProgramID is method to fill recorder.Recorder interface.
@@ -49,20 +52,32 @@ func (r *Radiko) Storage() string {
 // It returns rtmpdump command to record during airtime.
 func (r *Radiko) RecordCommand(outputPath string) string {
 	authToken := authorize()
-	return "rtmpdump -q -r " + rtmpURL + " --playpath 'simul-stream.stream' --app 'QRR/_definst_' -W " + swfURL + " -C S:'' -C S:'' -C S:'' -C S:" + authToken + " --live --stop " + strconv.Itoa(r.airtime) + " -o " + outputPath + ".flv"
+	return "rtmpdump -q -r " + rtmpURL + " --playpath 'simul-stream.stream' --app '" + r.channel + "/_definst_' -W " + swfURL + " -C S:'' -C S:'' -C S:'' -C S:" + authToken + " --live --stop " + strconv.Itoa(r.airtime) + " -o " + outputPath + ".flv"
 }
 
 // Start : record ag program
-func (r *Radiko) Start(programID int, airtime int, storage string) error {
+func (r *Radiko) Start(programID int, airtime int, storage string, channel int) error {
 	radiko := &Radiko{}
 	radiko.programID = programID
 	radiko.airtime = airtime
 	radiko.storage = storage
+	if channel == 2 {
+		radiko.channel = "QRR"
+	} else if channel == 3 {
+		radiko.channel = "HELLOFIVE"
+	}
 	return recorder.Record(radiko)
 }
 
 // authorize : 認証用のswf取得
 func authorize() string {
+	// Read config file
+	myconf := config.Config{}
+	err := myconf.Init()
+	if err != nil {
+		panic(err)
+	}
+
 	// keyファイル作成
 	parentDir, _ := filemanager.StaticFilePath()
 	swfPath := filepath.Join(parentDir, "player2.swf")
@@ -94,20 +109,39 @@ func authorize() string {
 	}
 	exec.Command(swfC[0], swfC[1:]...).Run()
 
-	// 認証1
-	values := url.Values{}
-	req, err := http.NewRequest("POST", "https://radiko.jp/v2/api/auth1_fms", strings.NewReader(values.Encode()))
+	// ログイン
+	// 取得したcookieはcookiejarにセットされる。後のリクエストではclientが同じであれば使い回される
+	logingURL := "https://radiko.jp/ap/member/login/login"
+	values0 := url.Values{}
+	values0.Add("mail", fmt.Sprintf("%v", myconf.List.Get("radiko.login.mail")))
+	values0.Add("pass", fmt.Sprintf("%v", myconf.List.Get("radiko.login.password")))
+	req0, err := http.NewRequest("POST", logingURL, strings.NewReader(values0.Encode()))
 	if err != nil {
 		panic(err)
 	}
-	req.Header.Add("pragma", "no-cache")
-	req.Header.Add("X-Radiko-App", "pc_ts")
-	req.Header.Add("X-Radiko-App-Version", "4.0.0")
-	req.Header.Add("X-Radiko-User", "test-stream")
-	req.Header.Add("X-Radiko-Device", "pc")
+	req0.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	jar, _ := cookiejar.New(nil)
+	client := &http.Client{Jar: jar}
+	resp0, err := client.Do(req0)
+	if err != nil {
+		panic(err)
+	}
+	defer resp0.Body.Close()
 
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	// 認証1
+	values := url.Values{}
+	req1, err := http.NewRequest("POST", "https://radiko.jp/v2/api/auth1_fms", strings.NewReader(values.Encode()))
+	if err != nil {
+		panic(err)
+	}
+	req1.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req1.Header.Add("pragma", "no-cache")
+	req1.Header.Add("X-Radiko-App", "pc_ts")
+	req1.Header.Add("X-Radiko-App-Version", "4.0.0")
+	req1.Header.Add("X-Radiko-User", "test-stream")
+	req1.Header.Add("X-Radiko-Device", "pc")
+
+	resp, err := client.Do(req1)
 	if err != nil {
 		panic(err)
 	}
@@ -134,6 +168,7 @@ func authorize() string {
 	if err != nil {
 		panic(err)
 	}
+	req1.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req2.Header.Add("pragma", "no-cache")
 	req2.Header.Add("X-Radiko-App", "pc_ts")
 	req2.Header.Add("X-Radiko-App-Version", "4.0.0")
@@ -142,8 +177,7 @@ func authorize() string {
 	req2.Header.Add("X-Radiko-Authtoken", autoToken)
 	req2.Header.Add("X-Radiko-Partialkey", partialkey)
 
-	client2 := &http.Client{}
-	resp2, err := client2.Do(req2)
+	resp2, err := client.Do(req2)
 	if err != nil {
 		panic(err)
 	}
