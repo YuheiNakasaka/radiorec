@@ -31,7 +31,7 @@ func (a *Ag) Storage() string {
 // RecordCommand is method to fill recorder.Recorder interface.
 // It returns rtmpdump command to record during airtime.
 func (a *Ag) RecordCommand(outputPath string) string {
-	return "rtmpdump -q -r rtmp://fms-base2.mitene.ad.jp/agqr/aandg333 --live --stop " + strconv.Itoa(a.airtime) + " -o " + outputPath + ".flv"
+	return "ffmpeg -loglevel error -y -allowed_extensions ALL -protocol_whitelist file,crypto,http,https,tcp,tls -i https://fms2.uniqueradio.jp/agqr10/aandg1.m3u8 -t " + strconv.Itoa(a.airtime) + " -vcodec copy -acodec copy -bsf:a aac_adtstoasc " + outputPath + ".mp4"
 }
 
 // Start : record ag program
