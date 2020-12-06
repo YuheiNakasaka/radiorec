@@ -2,20 +2,19 @@ package radiko
 
 import (
 	"encoding/base64"
+	"encoding/xml"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
 
 	"github.com/YuheiNakasaka/radiorec/config"
 	"github.com/YuheiNakasaka/radiorec/internal/filemanager"
-	"github.com/mattn/go-shellwords"
 
 	"github.com/YuheiNakasaka/radiorec/internal/recorder"
 )
@@ -31,6 +30,17 @@ type Radiko struct {
 	airtime   int
 	storage   string
 	channel   string
+}
+
+// URLTags is xml type
+type URLTags struct {
+	Lists []URLTag `xml:"url"`
+}
+
+// URLTag is xml type
+type URLTag struct {
+	AreaType string `xml:"areafree,attr"`
+	Text     string `xml:"playlist_create_url"`
 }
 
 // ProgramID is method to fill recorder.Recorder interface.
@@ -51,8 +61,38 @@ func (r *Radiko) Storage() string {
 // RecordCommand is method to fill recorder.Recorder interface.
 // It returns rtmpdump command to record during airtime.
 func (r *Radiko) RecordCommand(outputPath string) string {
+	url := fetchStreamURL(r.channel)
 	authToken := authorize()
-	return "rtmpdump -q -r " + rtmpURL + " --playpath 'simul-stream.stream' --app '" + r.channel + "/_definst_' -W " + swfURL + " -C S:'' -C S:'' -C S:'' -C S:" + authToken + " --live --stop " + strconv.Itoa(r.airtime) + " -o " + outputPath + ".flv"
+	return "ffmpeg -loglevel error -y -fflags +discardcorrupt -headers 'X-Radiko-Authtoken: " + authToken + "' -allowed_extensions ALL -protocol_whitelist file,crypto,http,https,tcp,tls -i " + url + " -t " + strconv.Itoa(r.airtime) + " -vcodec copy -acodec copy -bsf:a aac_adtstoasc " + outputPath + ".mp4"
+}
+
+func fetchStreamURL(channel string) string {
+	client := &http.Client{}
+
+	values := url.Values{}
+	req1, err := http.NewRequest("GET", "http://radiko.jp/v2/station/stream_smh_multi/"+channel+".xml", strings.NewReader(values.Encode()))
+	if err != nil {
+		panic(err)
+	}
+
+	resp, err := client.Do(req1)
+	if err != nil {
+		panic(err)
+	}
+	buf, _ := ioutil.ReadAll(resp.Body)
+
+	data := new(URLTags)
+	if err := xml.Unmarshal(buf, data); err != nil {
+		panic(err)
+	}
+
+	defer resp.Body.Close()
+	for i := 0; i < len(data.Lists); i++ {
+		if data.Lists[i].AreaType == "0" {
+			return data.Lists[i].Text
+		}
+	}
+	return ""
 }
 
 // Start : record ag program
@@ -80,34 +120,7 @@ func authorize() string {
 
 	// keyファイル作成
 	parentDir, _ := filemanager.StaticFilePath()
-	swfPath := filepath.Join(parentDir, "player2.swf")
-	keyPath := filepath.Join(parentDir, "radikokey2.png")
-
-	// 認証用swfダウンロード
-	response, err := http.Get(swfURL)
-	if err != nil {
-		panic(err)
-	}
-
-	body, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		panic(err)
-	}
-
-	file, err := os.OpenFile(swfPath, os.O_CREATE|os.O_WRONLY, 0666)
-	if err != nil {
-		panic(err)
-	}
-	defer file.Close()
-	file.Write(body)
-
-	// 認証用フレーム抽出
-	swfCmd := "swfextract -b 12 " + swfPath + " -o " + keyPath
-	swfC, err := shellwords.Parse(swfCmd)
-	if err != nil {
-		panic(err)
-	}
-	exec.Command(swfC[0], swfC[1:]...).Run()
+	keyPath := filepath.Join(parentDir, "radikokey2.txt")
 
 	// ログイン
 	// 取得したcookieはcookiejarにセットされる。後のリクエストではclientが同じであれば使い回される
@@ -130,14 +143,13 @@ func authorize() string {
 
 	// 認証1
 	values := url.Values{}
-	req1, err := http.NewRequest("POST", "https://radiko.jp/v2/api/auth1_fms", strings.NewReader(values.Encode()))
+	req1, err := http.NewRequest("GET", "https://radiko.jp/v2/api/auth1", strings.NewReader(values.Encode()))
 	if err != nil {
 		panic(err)
 	}
-	req1.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req1.Header.Add("pragma", "no-cache")
-	req1.Header.Add("X-Radiko-App", "pc_ts")
-	req1.Header.Add("X-Radiko-App-Version", "4.0.0")
+	req1.Header.Add("X-Radiko-App", "pc_html5")
+	req1.Header.Add("X-Radiko-App-Version", "0.0.1")
 	req1.Header.Add("X-Radiko-User", "test-stream")
 	req1.Header.Add("X-Radiko-Device", "pc")
 
@@ -164,14 +176,11 @@ func authorize() string {
 	partialkey := base64.StdEncoding.EncodeToString(buf)
 
 	values2 := url.Values{}
-	req2, err := http.NewRequest("POST", "https://radiko.jp/v2/api/auth2_fms", strings.NewReader(values2.Encode()))
+	req2, err := http.NewRequest("GET", "https://radiko.jp/v2/api/auth2", strings.NewReader(values2.Encode()))
 	if err != nil {
 		panic(err)
 	}
-	req1.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req2.Header.Add("pragma", "no-cache")
-	req2.Header.Add("X-Radiko-App", "pc_ts")
-	req2.Header.Add("X-Radiko-App-Version", "4.0.0")
 	req2.Header.Add("X-Radiko-User", "test-stream")
 	req2.Header.Add("X-Radiko-Device", "pc")
 	req2.Header.Add("X-Radiko-Authtoken", autoToken)
