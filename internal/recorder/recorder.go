@@ -55,11 +55,6 @@ func Record(r Recorder) error {
 	recCmd := r.RecordCommand(fileManager.OutputPath)
 	fmt.Println(recCmd)
 
-	// convert flv to mp4
-	mp4Ext := ".mp4"
-	mp4Cmd := "ffmpeg -y -i " + fileManager.OutputPath + ".flv -acodec aac -vcodec h264 " + fileManager.OutputPath + mp4Ext
-	fmt.Println(mp4Cmd)
-
 	// wait for finishing to record
 	var wg sync.WaitGroup
 	wg.Add(1)
@@ -72,22 +67,6 @@ func Record(r Recorder) error {
 		}
 		out, cmdErr := exec.Command(recC[0], recC[1:]...).Output()
 		fmt.Println(out, cmdErr)
-
-		if _, err = os.Stat(fileManager.OutputPath + ".flv"); err == nil {
-			// start converting
-			fmt.Println("Converting...")
-			convC, convErr := shellwords.Parse(mp4Cmd)
-			if convErr != nil {
-				return
-			}
-			convO, convE := exec.Command(convC[0], convC[1:]...).Output()
-			fmt.Println(convO, convE)
-
-			// remove src flv file
-			if rmErr := os.Remove(fileManager.OutputPath + ".flv"); rmErr != nil {
-				return
-			}
-		}
 
 		// register data to table
 		fmt.Println("Registering...")
